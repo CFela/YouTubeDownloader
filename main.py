@@ -1,4 +1,4 @@
-import os
+mport os
 import streamlit as st
 from yt_dlp import YoutubeDL
 
@@ -90,13 +90,34 @@ if download_type == "Custom Command":
 progress_bar = st.progress(0)
 status_text = st.empty()
 
+# Download controls
+download_in_progress = False
+pause_requested = False
+cancel_requested = False
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    start_download = st.button("⬇️ Start Download")
+with col2:
+    pause_download = st.button("⏸️ Pause Download")
+with col3:
+    cancel_download = st.button("❌ Cancel Download")
+
 # Download button and command execution
-if st.button("⬇️ Download"):
+if start_download:
     if url:
         st.info("⏳ Download in progress. Please wait...")
 
         # Progress hook function
         def progress_hook(d):
+            global pause_requested, cancel_requested
+            if cancel_requested:
+                raise Exception("Download canceled by user.")
+
+            while pause_requested:
+                st.info("⏸️ Download paused. Click Resume to continue.")
+
             if d['status'] == 'downloading':
                 percentage = float(d.get('downloaded_bytes', 0)) / float(d.get('total_bytes', 1))
                 progress_bar.progress(int(percentage * 100))
@@ -148,6 +169,14 @@ if st.button("⬇️ Download"):
                 st.error(f"❌ Download failed: {e}")
     else:
         st.warning("⚠️ Please enter a valid YouTube URL.")
+
+if pause_download:
+    pause_requested = True
+    st.info("⏸️ Download paused.")
+
+if cancel_download:
+    cancel_requested = True
+    st.warning("❌ Download canceled by user.")
 
 st.markdown("---")
 st.caption("Copyright © 2025 ChhinlungTech. All rights reserved.")
