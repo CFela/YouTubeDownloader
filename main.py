@@ -1,19 +1,9 @@
 import os
 import streamlit as st
-from tkinter import Tk, filedialog
 from yt_dlp import YoutubeDL
 
 # Streamlit UI configuration (MUST be the first Streamlit command)
 st.set_page_config(page_title="YouTube Downloader", layout="centered", initial_sidebar_state="collapsed")
-
-# Function to open folder picker dialog (always on top)
-def select_folder():
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    folder_selected = filedialog.askdirectory()
-    root.destroy()
-    return folder_selected
 
 # Function for browser notification (JavaScript injection)
 def browser_notification(title, message):
@@ -61,7 +51,7 @@ st.title("📥 YouTube Video/Audio Downloader")
 
 st.markdown("""
 This tool allows you to download YouTube videos or extract audio.  
-Paste the link, choose your preferred format, select the output path, and click **Download**.
+Paste the link, choose your preferred format, specify the output path, and click **Download**.
 """)
 
 # Input fields
@@ -82,17 +72,14 @@ elif download_type == "Audio":
     audio_format = st.selectbox("🎵 Select Audio Format:",
                                 ("mp3", "wav", "aac", "flac", "m4a"))
 
-# Folder picker for output path
-if st.button("📁 Select Download Folder"):
-    selected_folder = select_folder()
-    if selected_folder:
-        st.session_state["output_folder"] = selected_folder
-        st.success(f"Selected folder: {selected_folder}")
-    else:
-        st.warning("⚠️ No folder selected.")
+# Folder path input (replaces tkinter folder picker)
+output_folder = st.text_input(
+    "📁 Enter download folder path (default: downloads):",
+    value=st.session_state.get("output_folder", "downloads")
+)
 
-output_folder = st.session_state.get("output_folder", "downloads")
 os.makedirs(output_folder, exist_ok=True)
+st.session_state["output_folder"] = output_folder
 
 advanced_options = ""
 if download_type == "Custom Command":
