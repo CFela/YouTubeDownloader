@@ -107,13 +107,13 @@ with col3:
 # Download button and command execution
 if start_download:
     if url:
-        st.info("⏳ Download in progress. Please wait...")
+        st.info("⏳ Download in progress.")
 
         # Progress hook function
         def progress_hook(d):
             global pause_requested, cancel_requested
             if cancel_requested:
-                raise Exception("Download canceled by user.")
+                raise Exception("Download canceled.")
 
             while pause_requested:
                 st.info("⏸️ Download paused. Click Resume to continue.")
@@ -124,12 +124,12 @@ if start_download:
                 status_text.text(f"⬇️ Downloading: {d['_percent_str'].strip()} at {d['_speed_str']} - ETA {d['_eta_str']}")
             elif d['status'] == 'finished':
                 progress_bar.progress(100)
-                status_text.text("✅ Download complete! Processing file...")
+                status_text.text("✅ Download complete!")
 
         # yt-dlp options
         ydl_opts = {
             'progress_hooks': [progress_hook],
-            'outtmpl': f"{output_folder}/%(title)s.%(ext)s"
+            'outtmpl': f"{output_folder}/%(title)s_%(format_id)s.%(ext)s"
         }
 
         if download_type == "Best Quality":
@@ -176,7 +176,7 @@ if pause_download:
 
 if cancel_download:
     cancel_requested = True
-    st.warning("❌ Download canceled by user.")
+    st.warning("❌ Download canceled.")
 
 st.markdown("---")
 st.caption("Copyright © 2025 ChhinlungTech. All rights reserved.")
